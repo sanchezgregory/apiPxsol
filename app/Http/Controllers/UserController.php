@@ -50,8 +50,13 @@ class UserController extends Controller
 
     }
 
-    public function getUser(User $user)
+    public function getUser($id)
     {
-        return response()->json($user->getImagesForUserByRaw(), 200);
+        $user = User::find($id);
+        if ($user) {
+            return response()->json($user->getImagesForUserByRaw(), 200);
+        }
+
+       return response()->json('User not found', '404');
     }
 }
