@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UploadRequest;
 use App\Models\User;
+use App\Models\UserFile;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -19,11 +20,31 @@ class UserController extends Controller
             $user = User::where('id', '=', $request->user_id)->first();
             if (!$user) return response()->json('User not found', 404);
 
-            return response()->json($user, '200');
+            if ($request->hasFile('image')) {
+
+                $ext = $request->image->getClientOriginalExtension();
+                $imageName = $user->id . "_" . time();
+                $imageName = $imageName . "." . $ext;
+
+                $request->file('image')->storeAs('images', $imageName, 'public');
+
+                $userFile = new UserFile();
+                $userFile->user_id = $user->id;
+                $userFile->file_name = 'images/'.$imageName;
+                $userFile->url = "url";
+                $user->user_files()->save($userFile);
+
+                return response()->json($user->user_files, '201');
+            }
 
         } catch(\Exception $e) {
             return response()->json('Something wrong has happened, ' . $e->getMessage(), 500);
         }
 
+    }
+
+    public function getUser(User $user)
+    {
+        return response()->json($user->user_files, 200);
     }
 }
