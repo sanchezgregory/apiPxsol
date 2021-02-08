@@ -34,7 +34,18 @@ class UserController extends Controller
                 $userFile->url = "url";
                 $user->user_files()->save($userFile);
 
-                return response()->json($user->user_files, '201');
+                $data = [
+                    'user_id' => $user->id,
+                    'uploaded_file' => [
+                        'id' => $userFile->id,
+                        'file_name' => $userFile->file_name,
+                        'url' => $userFile->url,
+                        'created_at' => $userFile->created_at,
+                    ],
+                    'files' => $user->getImagesForUserByRaw()
+                ];
+
+                return response()->json($data, '201');
             }
 
         } catch(\Exception $e) {
@@ -45,6 +56,6 @@ class UserController extends Controller
 
     public function getUser(User $user)
     {
-        return response()->json($user->user_files, 200);
+        return response()->json($user->getImagesForUserByRaw(), 200);
     }
 }
